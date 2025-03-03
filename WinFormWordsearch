@@ -1,17 +1,271 @@
-        public void createLabels(char[,] charArray) // creates 400 labels and fills them with charArray[]
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace WinForm
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
         {
-            int NOlabel = 400;
-            labels = new Label[NOlabel];
-            int labelindex = 0;
-            for (int a = 0; a < NOlabel; a++)
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // Form1
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Name = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load_1);
+            this.ResumeLayout(false);
+
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
+        }
+    }
+    public class Matrix
+    {
+        public char[,] charArray;
+        public List<string> woorden;
+        public int richting, x, y, max, puzzelgrootte, woordLengte;
+        public bool kanplaatsen;
+
+        public Matrix(int puzzel)
+        {
+            puzzelgrootte = 20;
+            charArray = new char[puzzelgrootte, puzzelgrootte];
+            woorden = new List<string>();
+        }
+        public void FillArray()
+        {
+            GetRandom randomGenerator = new GetRandom(65, 90);
+            for (int a = 0; a < puzzelgrootte * puzzelgrootte; a++)
             {
-                int b = a / 20; //rows
-                int c = a % 20; // columns
-                labels[labelindex] = new Label();
-                labels[labelindex].Text = charArray[b , c].ToString();
-                labels[labelindex].Location = new System.Drawing.Point(10 + b * 30, 10 + c * 30);
-                labels[labelindex].Size = new System.Drawing.Size(20, 20);
-                this.Controls.Add(labels[labelindex]);
-                labelindex++;
+                int b = a / puzzelgrootte;
+                int c = a % puzzelgrootte;
+                randomGenerator.getRandomChar();
+                charArray[b, c] = randomGenerator.randomchar; 
+            }
+            return;
+        }
+        public void placeWord()
+        {
+            while (true)
+            {
+                GetRandom randomGenerator = new GetRandom(0, 19);
+                randomGenerator.GetRandomInt();
+                max = puzzelgrootte;
+                x = randomGenerator.randominteger;
+                y = randomGenerator.randominteger;
+                GetRandom randomRGenerator = new GetRandom(0, 4); //random richting generator
+                randomGenerator.GetRandomInt();
+                richting = randomGenerator.randominteger;    
+                if (kanplaatsen)
+                {
+                    switch (richting)
+                    {
+                        case 1: //horizontaal
+                            foreach (string woord in woorden)
+                            {
+                                for (int i = 0; i < woordLengte - 1; i++)
+                                    charArray[x + i, y] = woord[i];
+                                x += woord.Length + 1;
+                            }
+                            break;
+                        case 2: //verticaal
+                            foreach (string woord in woorden)
+                            {
+                                for (int i = 0; i < woordLengte - 1; i++)
+                                    charArray[x, y + 1] = woord[i];
+                                x += woord.Length + 1;
+                            }  
+                            break;
+                        case 3: //diagonaal omhoog
+                            foreach (string woord in woorden)
+                            {
+                                for (int i = 0; i < woordLengte - 1; i++)
+                                    charArray[x + 1, y - 1] = woord[i];
+                                x += woord.Length + 1;
+                            }
+                            break;
+                        case 4: //diagonaal omlaag
+                            foreach (string woord in woorden)
+                            {
+                                for (int i = 0; i < woordLengte - 1; i++)
+                                    charArray[x - 1, y + 1] = woord[i];
+                            }
+                            break;
+                    }
+                }
             }
         }
+        public bool canPlaceWord()
+        {
+
+            int woordLengte;
+            foreach (string woord in woorden)
+            {
+                woordLengte = woord.Length;
+                bool kanplaatsen = true;
+                switch (richting)
+                {
+                    case 1: //horizontaal
+                        if (x + woordLengte >= puzzelgrootte)
+                            return false;
+                        for (int i = 0; i < woordLengte; i++)
+                        {
+                            if (charArray[x + i, y] != woord[i])
+                            {
+                                kanplaatsen = true;
+                                break;
+                            }
+                        }
+                        break;
+                    case 2: //verticaal
+                        if (y + woordLengte >= puzzelgrootte)
+                            return false;
+                        for (int i = 0; i < woordLengte; i++)
+                        {
+                            if (charArray[x, y + i] != woord[i])
+                            {
+                                kanplaatsen = true;
+                                break;
+                            }
+                        }
+                        break;
+                    case 3: //diagonaal omhoog
+                        if (x + woordLengte >= puzzelgrootte || y - woordLengte < 0)
+                            return false;
+                        for (int i = 0; i < woordLengte; i++)
+                        {
+                            if (charArray[x + i, y - 1] != woord[i])
+                            {
+                                kanplaatsen = true;
+                                break;
+                            }
+                        }
+                        break;
+                    case 4: //diagonaal omlaag
+                        if (x - woordLengte < 0 || y + woordLengte >= puzzelgrootte)
+                            return false;
+                        for (int i = 0; i < woordLengte; i++)
+                        {
+                            if (charArray[x - i, y + 1] != woord[i])
+                            {
+                                kanplaatsen = true;
+                                break;
+                            }
+                        }
+                        break;
+                }
+                if (kanplaatsen)
+                    return true;
+            }
+            return false;
+        }
+    }
+    public class GetRandom
+    {
+        int max, min;
+        public char randomchar;
+        public int randominteger;
+
+        public GetRandom(int min, int max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+        public void GetRandomInt()
+        {
+            Random rnd = new Random();
+            int randominteger = rnd.Next(min, max);
+        }
+        public void getRandomChar()
+        {
+            Random rnd = new Random();
+            int randomchar = (char)rnd.Next(min, max);
+        }
+    }
+    public class Word
+{
+    List <string> woorden;
+    char [] charArray;
+    string userAnswer, reverseUserAnswer;
+    bool isAnswerCorrect;
+    int teller, lengte;
+
+    public Word() 
+    {
+        teller = 0;
+        userAnswer = string.Empty;
+    }
+    public bool CompareTekst (bool isAnswerCorrect) 
+    { 
+        isAnswerCorrect = false;
+        lengte = woorden.Count;
+        for (int teller = 0; teller < lengte; teller++)
+        {
+            if (woorden[teller] == userAnswer || woorden[teller] == reverseUserAnswer)
+            {
+                isAnswerCorrect = true;
+            }
+        }
+        
+        return isAnswerCorrect;
+    }
+    public void ReverseTekst()
+    {
+        charArray = userAnswer.ToCharArray();
+        Array.Reverse(charArray);
+        reverseUserAnswer = new string(charArray);
+    }
+}
+public class ReadUserInput 
+{
+    int x1, x2, y1, y2;
+    string richting;
+    public ReadUserInput (string richting)
+    {
+        richting = string.Empty;
+    }
+    public string isValidDirection (int x1,int x2, int y1, int y2, string richting) 
+    { 
+        if(y1 == y2) 
+        {
+            richting = "Horizontal";
+        }
+        else if (x1 == x2)
+        {
+            richting = "Vertical";
+        }
+        else if (Math.Abs(x1 - x2) == Math.Abs(y1 - y2))
+        {
+            richting = "diagonalUp";
+        }
+        else if ((x1 - x2) == (y1 - y2))
+        {
+            richting = "diagonalDown";
+        }
+        return richting;
+    }
+  }
+
+}
