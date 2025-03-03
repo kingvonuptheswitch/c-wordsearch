@@ -1,0 +1,17 @@
+        public void createLabels(char[,] charArray) // creates 400 labels and fills them with charArray[]
+        {
+            int NOlabel = 400;
+            labels = new Label[NOlabel];
+            int labelindex = 0;
+            for (int a = 0; a < NOlabel; a++)
+            {
+                int b = a / 20; //rows
+                int c = a % 20; // columns
+                labels[labelindex] = new Label();
+                labels[labelindex].Text = charArray[b , c].ToString();
+                labels[labelindex].Location = new System.Drawing.Point(10 + b * 30, 10 + c * 30);
+                labels[labelindex].Size = new System.Drawing.Size(20, 20);
+                this.Controls.Add(labels[labelindex]);
+                labelindex++;
+            }
+        }
